@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#070b16">
+    <title>TRON — Light Cycles</title>
+    <style>
+:root {
+  color-scheme: dark;
+  font-family: "Courier New", monospace;
+  background: #070b16;
+  color: #e6f4ff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  padding: 28px 20px;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(rgba(35, 67, 110, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 67, 110, 0.1) 1px, transparent 1px),
+    #070b16;
+  background-size: 32px 32px;
+}
+
+button {
+  font: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.game-shell {
+  width: min(94vw, 1100px);
+  display: grid;
+  gap: 16px;
+}
+
+.match-screen {
+  display: grid;
+  gap: 16px;
+}
+
+.game-header {
+  text-align: center;
+}
+
+.eyebrow,
+.subtitle,
+.footer-note {
+  color: #8296b5;
+}
+
+.eyebrow {
+  margin: 0 0 5px;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+}
+
+h1 {
+  margin: 0;
+  color: #e6f4ff;
+  font-size: clamp(2rem, 7vw, 4rem);
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-shadow: 4px 4px 0 #123a58;
+}
+
+h1 span {
+  color: #3de7f4;
+}
+
+.subtitle {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+}
+
+.mode-menu {
+  padding: clamp(20px, 5vw, 38px);
+  border: 2px solid #28436a;
+  background: #0c1424;
+  box-shadow:
+    0 0 0 3px #0b1425,
+    6px 6px 0 #03060d;
+  text-align: center;
+}
+
+.mode-menu h2 {
+  margin: 0;
+  color: #e6f4ff;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mode-description {
+  max-width: 580px;
+  margin: 12px auto 22px;
+  color: #9aacc7;
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.mode-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mode-button {
+  min-height: 62px;
+  padding: 12px;
+  border: 2px solid #3de7f4;
+  background: #10233a;
+  color: #e6f4ff;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 4px 4px 0 #03060d;
+}
+
+.mode-button:hover {
+  background: #17314d;
+  transform: translate(-1px, -1px);
+}
+
+.mode-button.secondary {
+  border-color: #ff9d42;
+  background: #211a1b;
+}
+
+.mode-button:focus-visible,
+.hud-button:focus-visible {
+  outline: 2px solid #e6f4ff;
+  outline-offset: 3px;
+}
+
+.game-hud {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 14px;
+  border: 2px solid #1c3150;
+  background: #0c1424;
+  box-shadow: 4px 4px 0 #03060d;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
+.round-status,
+.mode-readout,
+.speed-readout {
+  margin: 0;
+}
+
+.round-status {
+  color: #a9bedb;
+}
+
+.speed-readout {
+  color: #8296b5;
+}
+
+.mode-readout {
+  color: #8296b5;
+}
+
+.mode-readout span {
+  margin-left: 6px;
+  color: #ff9d42;
+}
+
+.speed-readout span {
+  margin-left: 6px;
+  color: #3de7f4;
+}
+
+.hud-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.hud-button {
+  padding: 7px 10px;
+  border: 2px solid #345274;
+  background: #13233a;
+  color: #e6f4ff;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.hud-button span {
+  color: #9ab0ce;
+}
+
+.hud-button:hover {
+  border-color: #3de7f4;
+}
+
+.hud-button.secondary {
+  border-color: #345274;
+  background: #101927;
+}
+
+.board-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 3px solid #28436a;
+  background: #070d1c;
+  box-shadow:
+    0 0 0 3px #0b1425,
+    0 0 26px rgba(48, 138, 202, 0.16),
+    6px 6px 0 #03060d;
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  image-rendering: pixelated;
+}
+
+.round-result {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(5, 9, 20, 0.88);
+  color: #f0f8ff;
+  text-align: center;
+  font-size: clamp(1rem, 3vw, 2rem);
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-shadow: 3px 3px 0 #123a58;
+}
+
+.round-result[hidden] {
+  display: none;
+}
+
+.control-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.player-controls {
+  padding: 12px 14px;
+  border: 2px solid #1c3150;
+  background: #0c1424;
+  box-shadow: 4px 4px 0 #03060d;
+  font-size: 0.76rem;
+}
+
+.player-controls h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 9px;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.player-controls p {
+  margin: 5px 0 0;
+  color: #a9bedb;
+}
+
+.player-marker {
+  width: 8px;
+  height: 8px;
+  background: #3de7f4;
+  box-shadow: 2px 2px 0 #143b57;
+}
+
+.player-two .player-marker {
+  background: #ff9d42;
+  box-shadow: 2px 2px 0 #63361f;
+}
+
+kbd {
+  display: inline-block;
+  min-width: 22px;
+  padding: 2px 5px;
+  border: 1px solid #345274;
+  background: #111e32;
+  color: #e6f4ff;
+  text-align: center;
+  box-shadow: 2px 2px 0 #03060d;
+}
+
+.footer-note {
+  margin: 0;
+  text-align: center;
+  font-size: 0.7rem;
+}
+
+@media (max-width: 620px) {
+  body {
+    padding: 18px 12px;
+  }
+
+  .game-shell {
+    width: 96vw;
+    gap: 12px;
+  }
+
+  .match-screen {
+    gap: 12px;
+  }
+
+  .game-hud {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .round-status {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+
+  .hud-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .mode-options {
+    grid-template-columns: 1fr;
+  }
+
+  .control-panel {
+    gap: 8px;
+  }
+
+  .player-controls {
+    padding: 10px;
+    font-size: 0.66rem;
+  }
+
+  .player-controls h2 {
+    font-size: 0.72rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}
+
+</style>
+</head>
+<body>
+    <main class="game-shell">
+        <header class="game-header">
+            <p class="eyebrow">LIGHT CYCLES // ARCADE</p>
+            <h1>TRON<span>_</span></h1>
+            <p class="subtitle">Оставь сопернику всё меньше пространства.</p>
+        </header>
+
+        <section id="mode-menu" class="mode-menu" aria-labelledby="mode-title">
+            <p class="eyebrow">НОВЫЙ РАУНД</p>
+            <h2 id="mode-title">Выбери соперника</h2>
+            <p class="mode-description">
+                Бот выбирает повороты и собственную скорость, оценивая свободное пространство.
+            </p>
+            <div class="mode-options">
+                <button class="mode-button" type="button" data-mode="bot">
+                    Играть против бота
+                </button>
+                <button class="mode-button secondary" type="button" data-mode="local">
+                    Играть вдвоём
+                </button>
+            </div>
+        </section>
+
+        <section id="match-screen" class="match-screen" aria-label="Игровой раунд" hidden>
+            <section class="game-hud" aria-label="Состояние игры">
+                <p id="round-status" class="round-status" aria-live="polite">Раунд идёт</p>
+                <p class="mode-readout">РЕЖИМ <span id="mode-label"></span></p>
+                <p class="speed-readout">ИГРОК 1 <span id="player-one-speed">СРЕДНЯЯ</span></p>
+                <p class="speed-readout"><span id="player-two-speed-name">ИГРОК 2</span> <span id="player-two-speed">СРЕДНЯЯ</span></p>
+                <div class="hud-actions">
+                    <button id="restart-button" class="hud-button" type="button">
+                        Новый раунд <span>[R]</span>
+                    </button>
+                    <button id="change-mode-button" class="hud-button secondary" type="button">
+                        Выбрать режим
+                    </button>
+                </div>
+            </section>
+
+            <section class="board-frame" aria-label="Игровое поле">
+                <canvas
+                    id="game"
+                    width="512"
+                    height="288"
+                    aria-label="Поле TRON размером 128 на 72 клетки"
+                >
+                    Для игры необходим браузер с поддержкой Canvas.
+                </canvas>
+                <div id="round-result" class="round-result" role="status" aria-live="polite" hidden></div>
+            </section>
+
+            <section class="control-panel" aria-label="Управление">
+                <div class="player-controls player-one">
+                    <h2><span class="player-marker"></span> Игрок 1</h2>
+                    <p><kbd>A</kbd> / <kbd>D</kbd> поворот</p>
+                    <p><kbd>W</kbd> / <kbd>S</kbd> скорость + / −</p>
+                </div>
+                <div id="player-two-controls" class="player-controls player-two">
+                    <h2><span class="player-marker"></span> <span id="player-two-name">Игрок 2</span></h2>
+                    <div id="player-two-keys">
+                        <p><kbd>←</kbd> / <kbd>→</kbd> поворот</p>
+                        <p><kbd>↑</kbd> / <kbd>↓</kbd> скорость + / −</p>
+                    </div>
+                    <p id="player-two-bot-hint" hidden>Выбирает безопасные повороты автоматически.</p>
+                </div>
+            </section>
+
+            <p class="footer-note">У каждого байка своя скорость. Поворот и смена скорости применяются на его следующем шаге. Каждый шаг — одна клетка; полной остановки нет.</p>
+        </section>
+    </main>
+
+    <script>
+(() => {
+const WIDTH = 128;
+const HEIGHT = 72;
+
+const SPEED_LEVEL = Object.freeze({
+  SLOW: 0,
+  NORMAL: 1,
+  FAST: 2,
+  VERY_FAST: 3,
+});
+
+const TRAIL_LIFETIME_MS = 6000;
+
+const START_X = 64;
+
+function createInitialGame(match = {}) {
+  const players = [
+    {
+      id: "player1",
+      x: START_X,
+      y: 61,
+      direction: "up",
+      speedLevel: SPEED_LEVEL.NORMAL,
+    },
+    {
+      id: "player2",
+      x: START_X,
+      y: 10,
+      direction: "down",
+      speedLevel: SPEED_LEVEL.NORMAL,
+    },
+  ];
+
+  return {
+    width: WIDTH,
+    height: HEIGHT,
+    players,
+    trails: players.map(({ id, x, y }) => ({
+      playerId: id,
+      x,
+      y,
+      expiresAt: TRAIL_LIFETIME_MS,
+    })),
+    elapsedMs: 0,
+    status: "playing",
+    winner: null,
+    matchScore: match.matchScore
+      ? { ...match.matchScore }
+      : { player1: 0, player2: 0 },
+    matchWinner: null,
+  };
+}
+
+function createGame() {
+  return createInitialGame();
+}
+
+function resetRound(game) {
+  return createInitialGame(game?.matchWinner ? {} : {
+    matchScore: game?.matchScore,
+  });
+}
+
+const turnDirections = {
+  up: { left: "left", right: "right" },
+  right: { left: "up", right: "down" },
+  down: { left: "right", right: "left" },
+  left: { left: "down", right: "up" },
+};
+
+const vectors = {
+  up: { x: 0, y: -1 },
+  right: { x: 1, y: 0 },
+  down: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+};
+
+function isInsideField({ x, y }) {
+  return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT;
+}
+
+function cellKey({ x, y }) {
+  return `${x},${y}`;
+}
+
+function updateSpeedLevel(speedLevel, speedCommand) {
+  if (speedCommand === "forward") {
+    return Math.min(SPEED_LEVEL.VERY_FAST, speedLevel + 1);
+  }
+  if (speedCommand === "backward") {
+    return Math.max(SPEED_LEVEL.SLOW, speedLevel - 1);
+  }
+  return speedLevel;
+}
+
+function stepGame(
+  game,
+  commands = {},
+  movingPlayerIds = game.players.map((player) => player.id),
+  elapsedMs = 0,
+) {
+  if (game.status !== "playing") return game;
+
+  const nextElapsedMs = (game.elapsedMs ?? 0) + elapsedMs;
+  const activeTrails = game.trails.filter(
+    (trail) => trail.expiresAt === undefined || trail.expiresAt > nextElapsedMs,
+  );
+
+  const movingPlayers = new Set(movingPlayerIds);
+  if (movingPlayers.size === 0) {
+    return {
+      ...game,
+      trails: activeTrails,
+      elapsedMs: nextElapsedMs,
+    };
+  }
+
+  const snapshotPlayers = game.players.map((player) => {
+    const moving = movingPlayers.has(player.id);
+    const command = moving ? commands[player.id] ?? {} : {};
+    const direction =
+      command.turn === "left" || command.turn === "right"
+        ? turnDirections[player.direction][command.turn]
+        : player.direction;
+    const speedLevel = updateSpeedLevel(player.speedLevel, command.speed);
+    const vector = vectors[direction];
+
+    return {
+      ...player,
+      direction,
+      speedLevel,
+      moving,
+      next: moving
+        ? { x: player.x + vector.x, y: player.y + vector.y }
+        : { x: player.x, y: player.y },
+    };
+  });
+
+  const collisions = snapshotPlayers.map(
+    ({ moving, next }) =>
+      moving &&
+      (!isInsideField(next) ||
+        activeTrails.some((trail) => cellKey(trail) === cellKey(next))),
+  );
+
+  const [first, second] = snapshotPlayers;
+  if (
+    first.moving &&
+    second.moving &&
+    first.next.x === second.next.x &&
+    first.next.y === second.next.y
+  ) {
+    collisions[0] = true;
+    collisions[1] = true;
+  }
+  if (
+    first.moving &&
+    second.moving &&
+    first.next.x === second.x &&
+    first.next.y === second.y &&
+    second.next.x === first.x &&
+    second.next.y === first.y
+  ) {
+    collisions[0] = true;
+    collisions[1] = true;
+  }
+
+  const players = snapshotPlayers.map(({ moving, next, ...player }, index) =>
+    moving && !collisions[index]
+      ? { ...player, x: next.x, y: next.y }
+      : player,
+  );
+  const trails = [
+    ...activeTrails,
+    ...snapshotPlayers.flatMap(({ id, moving, next }, index) =>
+      moving && !collisions[index]
+        ? [{
+            playerId: id,
+            x: next.x,
+            y: next.y,
+            expiresAt: nextElapsedMs + TRAIL_LIFETIME_MS,
+          }]
+        : [],
+    ),
+  ];
+  const collidedPlayers = snapshotPlayers.filter(
+    (_, index) => collisions[index],
+  );
+  const isDraw = collidedPlayers.length > 1;
+  const winner =
+    collidedPlayers.length === 0
+      ? null
+      : isDraw
+        ? null
+        : players.find((player) => player.id !== collidedPlayers[0].id).id;
+
+  const matchScore = { ...(game.matchScore ?? { player1: 0, player2: 0 }) };
+  if (winner) matchScore[winner] += 1;
+  const matchWinner =
+    matchScore.player1 >= 2
+      ? "player1"
+      : matchScore.player2 >= 2
+        ? "player2"
+        : null;
+
+  return {
+    ...game,
+    players,
+    trails,
+    elapsedMs: nextElapsedMs,
+    status: collidedPlayers.length > 0 ? "finished" : "playing",
+    winner,
+    matchScore,
+    matchWinner,
+  };
+}
+
+const keyCommands = {
+  KeyA: { playerId: "player1", command: { turn: "left" } },
+  KeyD: { playerId: "player1", command: { turn: "right" } },
+  KeyW: { playerId: "player1", command: { speed: "forward" } },
+  KeyS: { playerId: "player1", command: { speed: "backward" } },
+  ArrowLeft: { playerId: "player2", command: { turn: "left" } },
+  ArrowRight: { playerId: "player2", command: { turn: "right" } },
+  ArrowUp: { playerId: "player2", command: { speed: "forward" } },
+  ArrowDown: { playerId: "player2", command: { speed: "backward" } },
+};
+
+function attachKeyboardControls({ onCommand, onRestart }) {
+  const pressedKeys = new Set();
+
+  function handleKeyDown(event) {
+    const keyCommand = keyCommands[event.code];
+    const isRestart = event.code === "KeyR";
+
+    if (!keyCommand && !isRestart) return;
+
+    event.preventDefault();
+    if (event.repeat || pressedKeys.has(event.code)) return;
+    pressedKeys.add(event.code);
+
+    if (isRestart) {
+      onRestart();
+      return;
+    }
+
+    onCommand(keyCommand.playerId, keyCommand.command);
+  }
+
+  function handleKeyUp(event) {
+    pressedKeys.delete(event.code);
+  }
+
+  function clearPressedKeys() {
+    pressedKeys.clear();
+  }
+
+  window.addEventListener("keydown", handleKeyDown);
+  window.addEventListener("keyup", handleKeyUp);
+  window.addEventListener("blur", clearPressedKeys);
+
+  return function detachKeyboardControls() {
+    window.removeEventListener("keydown", handleKeyDown);
+    window.removeEventListener("keyup", handleKeyUp);
+    window.removeEventListener("blur", clearPressedKeys);
+  };
+}
+
+
+const botTurnDirections = {
+  up: { left: "left", right: "right" },
+  right: { left: "up", right: "down" },
+  down: { left: "right", right: "left" },
+  left: { left: "down", right: "up" },
+};
+
+const botVectors = {
+  up: { x: 0, y: -1 },
+  right: { x: 1, y: 0 },
+  down: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+};
+
+function getDirection(player, turn) {
+  return turn === "left" || turn === "right"
+    ? botTurnDirections[player.direction][turn]
+    : player.direction;
+}
+
+function getNextCell(player, direction) {
+  const vector = botVectors[direction];
+  return { x: player.x + vector.x, y: player.y + vector.y };
+}
+
+function botIsInsideField(game, cell) {
+  return cell.x >= 0 && cell.x < game.width && cell.y >= 0 && cell.y < game.height;
+}
+
+function botCellKey(cell) {
+  return `${cell.x},${cell.y}`;
+}
+
+function chooseBotCommand(
+  game,
+  humanCommand = {},
+  humanIsMoving = true,
+) {
+  const bot = game.players.find((player) => player.id === "player2");
+  const human = game.players.find((player) => player.id === "player1");
+  if (!bot || !human || game.status !== "playing") return {};
+
+  const humanNext = humanIsMoving
+    ? getNextCell(human, getDirection(human, humanCommand.turn))
+    : { x: human.x, y: human.y };
+  const elapsedMs = game.elapsedMs ?? 0;
+  const blocked = new Set(
+    game.trails
+      .filter((trail) => trail.expiresAt === undefined || trail.expiresAt > elapsedMs)
+      .map(botCellKey),
+  );
+  if (humanIsMoving) blocked.add(botCellKey(humanNext));
+
+  const choices = [null, "left", "right"]
+    .map((turn) => {
+      const direction = getDirection(bot, turn);
+      return { turn, direction, next: getNextCell(bot, direction) };
+    })
+    .filter(
+      ({ next }) =>
+        botIsInsideField(game, next) && !blocked.has(botCellKey(next)),
+    )
+    .map((choice) => {
+      const futureBlocked = new Set(blocked);
+      futureBlocked.add(botCellKey(choice.next));
+      const exits = [null, "left", "right"].filter((turn) => {
+        const direction = getDirection({ ...bot, direction: choice.direction }, turn);
+        const next = getNextCell(choice.next, direction);
+        return botIsInsideField(game, next) && !futureBlocked.has(botCellKey(next));
+      });
+
+      return { ...choice, score: exits.length };
+    });
+
+  let best = choices[0];
+  for (const choice of choices.slice(1)) {
+    if (choice.score > best.score) best = choice;
+  }
+
+  if (!best) return {};
+
+  const targetSpeed =
+    best.score >= 3
+      ? SPEED_LEVEL.VERY_FAST
+      : best.score === 2
+        ? SPEED_LEVEL.NORMAL
+        : SPEED_LEVEL.SLOW;
+  const speed =
+    targetSpeed > bot.speedLevel
+      ? "forward"
+      : targetSpeed < bot.speedLevel
+        ? "backward"
+        : undefined;
+
+  return {
+    ...(best.turn ? { turn: best.turn } : {}),
+    ...(speed ? { speed } : {}),
+  };
+}
+
+
+const PIXELS_PER_CELL = 4;
+const COLORS = Object.freeze({
+  background: "#070d1c",
+  grid: "#142039",
+  player1Trail: "#3de7f4",
+  player1Head: "#c5fbff",
+  player2Trail: "#ff9d42",
+  player2Head: "#fff0c5",
+});
+
+function createCanvasRenderer(canvas) {
+  const context = canvas.getContext("2d", { alpha: false });
+  if (!context) {
+    throw new Error("Could not create a 2D context for the game canvas.");
+  }
+
+  canvas.width = WIDTH * PIXELS_PER_CELL;
+  canvas.height = HEIGHT * PIXELS_PER_CELL;
+  context.imageSmoothingEnabled = false;
+
+  return function drawGame(game) {
+    const boardWidth = game.width * PIXELS_PER_CELL;
+    const boardHeight = game.height * PIXELS_PER_CELL;
+
+    context.fillStyle = COLORS.background;
+    context.fillRect(0, 0, boardWidth, boardHeight);
+
+    context.fillStyle = COLORS.grid;
+    for (let x = 0; x <= game.width; x += 1) {
+      context.fillRect(x * PIXELS_PER_CELL, 0, 1, boardHeight);
+    }
+    for (let y = 0; y <= game.height; y += 1) {
+      context.fillRect(0, y * PIXELS_PER_CELL, boardWidth, 1);
+    }
+
+    for (const trail of game.trails) {
+      const remainingMs =
+        trail.expiresAt === undefined
+          ? TRAIL_LIFETIME_MS
+          : trail.expiresAt - (game.elapsedMs ?? 0);
+      const ratio = Math.max(0, Math.min(1, remainingMs / TRAIL_LIFETIME_MS));
+
+      context.globalAlpha = 0.65 + ratio * 0.35;
+      context.fillStyle =
+        trail.playerId === "player1" ? COLORS.player1Trail : COLORS.player2Trail;
+      context.fillRect(
+        trail.x * PIXELS_PER_CELL,
+        trail.y * PIXELS_PER_CELL,
+        PIXELS_PER_CELL,
+        PIXELS_PER_CELL,
+      );
+    }
+    context.globalAlpha = 1;
+
+    for (const player of game.players) {
+      context.fillStyle =
+        player.id === "player1" ? COLORS.player1Head : COLORS.player2Head;
+      context.fillRect(
+        player.x * PIXELS_PER_CELL + 1,
+        player.y * PIXELS_PER_CELL + 1,
+        PIXELS_PER_CELL - 2,
+        PIXELS_PER_CELL - 2,
+      );
+    }
+  };
+}
+
+
+const canvas = document.getElementById("game");
+const modeMenu = document.getElementById("mode-menu");
+const matchScreen = document.getElementById("match-screen");
+const roundStatus = document.getElementById("round-status");
+const modeLabel = document.getElementById("mode-label");
+const playerOneSpeedValue = document.getElementById("player-one-speed");
+const playerTwoSpeedValue = document.getElementById("player-two-speed");
+const playerTwoSpeedName = document.getElementById("player-two-speed-name");
+const roundResult = document.getElementById("round-result");
+const restartButton = document.getElementById("restart-button");
+const changeModeButton = document.getElementById("change-mode-button");
+const playerTwoName = document.getElementById("player-two-name");
+const playerTwoKeys = document.getElementById("player-two-keys");
+const playerTwoBotHint = document.getElementById("player-two-bot-hint");
+
+if (!(canvas instanceof HTMLCanvasElement)) {
+  throw new Error("The game canvas was not found.");
+}
+
+if (
+  !modeMenu ||
+  !matchScreen ||
+  !roundStatus ||
+  !modeLabel ||
+  !playerOneSpeedValue ||
+  !playerTwoSpeedValue ||
+  !playerTwoSpeedName ||
+  !roundResult ||
+  !restartButton ||
+  !changeModeButton ||
+  !playerTwoName ||
+  !playerTwoKeys ||
+  !playerTwoBotHint
+) {
+  throw new Error("A required game interface element was not found.");
+}
+
+const SPEED_INTERVAL_MS = Object.freeze({
+  [SPEED_LEVEL.SLOW]: 160,
+  [SPEED_LEVEL.NORMAL]: 105,
+  [SPEED_LEVEL.FAST]: 70,
+  [SPEED_LEVEL.VERY_FAST]: 50,
+});
+
+const SPEED_LABELS = Object.freeze({
+  [SPEED_LEVEL.SLOW]: "МЕДЛЕННАЯ",
+  [SPEED_LEVEL.NORMAL]: "СРЕДНЯЯ",
+  [SPEED_LEVEL.FAST]: "БЫСТРАЯ",
+  [SPEED_LEVEL.VERY_FAST]: "ОЧЕНЬ БЫСТРАЯ",
+});
+
+const MAX_FRAME_DELTA_MS = 250;
+const SIMULTANEOUS_EPSILON_MS = 0.01;
+const drawGame = createCanvasRenderer(canvas);
+let selectedMode = null;
+let game = null;
+let pendingCommands = createEmptyCommands();
+let movementTimers = {};
+let previousFrameTime = null;
+
+function createEmptyCommands() {
+  return {
+    player1: {},
+    player2: {},
+  };
+}
+
+function createMovementTimers(state) {
+  return Object.fromEntries(
+    state.players.map((player) => [
+      player.id,
+      SPEED_INTERVAL_MS[player.speedLevel],
+    ]),
+  );
+}
+
+function queueCommand(playerId, command) {
+  if (!game || (selectedMode === "bot" && playerId === "player2")) return;
+
+  pendingCommands[playerId] = {
+    ...pendingCommands[playerId],
+    ...command,
+  };
+}
+
+function updateInterface() {
+  const playerOne = game.players.find((player) => player.id === "player1");
+  const playerTwo = game.players.find((player) => player.id === "player2");
+
+  playerOneSpeedValue.textContent = SPEED_LABELS[playerOne.speedLevel];
+  playerTwoSpeedValue.textContent = SPEED_LABELS[playerTwo.speedLevel];
+  playerTwoSpeedName.textContent =
+    selectedMode === "bot" ? "БОТ" : "ИГРОК 2";
+  modeLabel.textContent =
+    selectedMode === "bot" ? "ПРОТИВ БОТА" : "ЛОКАЛЬНАЯ ИГРА";
+  roundStatus.textContent =
+    game.status === "playing"
+      ? `РАУНД ИДЁТ · СЧЁТ ${game.matchScore.player1}:${game.matchScore.player2}`
+      : `РАУНД ЗАВЕРШЁН · СЧЁТ ${game.matchScore.player1}:${game.matchScore.player2}`;
+  playerTwoName.textContent = selectedMode === "bot" ? "БОТ" : "ИГРОК 2";
+  playerTwoKeys.hidden = selectedMode === "bot";
+  playerTwoBotHint.hidden = selectedMode !== "bot";
+  roundResult.hidden = game.status !== "finished";
+
+  if (game.status === "finished") {
+    const winnerName =
+      game.winner === "player1"
+        ? "ИГРОК 1"
+        : game.winner === "player2"
+          ? selectedMode === "bot"
+            ? "БОТ"
+            : "ИГРОК 2"
+          : null;
+    const outcome = game.matchWinner
+      ? `${winnerName} ВЫИГРАЛ МАТЧ ${game.matchScore.player1}:${game.matchScore.player2}`
+      : winnerName
+        ? `${winnerName} ПОБЕДИЛ В РАУНДЕ`
+        : "НИЧЬЯ В РАУНДЕ";
+    roundResult.textContent = `${outcome} · НАЖМИТЕ R ДЛЯ ${game.matchWinner ? "НОВОГО МАТЧА" : "НОВОГО РАУНДА"}`;
+  }
+}
+
+function render() {
+  if (!game) return;
+  drawGame(game);
+  updateInterface();
+}
+
+function startMatch(mode) {
+  if (mode !== "bot" && mode !== "local") {
+    throw new Error(`Unknown game mode: ${mode}`);
+  }
+
+  selectedMode = mode;
+  game = createGame();
+  pendingCommands = createEmptyCommands();
+  movementTimers = createMovementTimers(game);
+  previousFrameTime = null;
+  modeMenu.hidden = true;
+  matchScreen.hidden = false;
+  render();
+}
+
+function startNewRound() {
+  if (!selectedMode) return;
+
+  game = resetRound(game);
+  pendingCommands = createEmptyCommands();
+  movementTimers = createMovementTimers(game);
+  previousFrameTime = null;
+  render();
+}
+
+function returnToModeMenu() {
+  selectedMode = null;
+  game = null;
+  pendingCommands = createEmptyCommands();
+  movementTimers = {};
+  previousFrameTime = null;
+  matchScreen.hidden = true;
+  modeMenu.hidden = false;
+}
+
+function advanceByElapsed(elapsed) {
+  let remaining = elapsed;
+
+  while (remaining > 0 && game?.status === "playing") {
+    const nextMoveIn = Math.min(...Object.values(movementTimers));
+    if (nextMoveIn > remaining) {
+      for (const playerId of Object.keys(movementTimers)) {
+        movementTimers[playerId] -= remaining;
+      }
+      game = stepGame(game, {}, [], remaining);
+      break;
+    }
+
+    for (const playerId of Object.keys(movementTimers)) {
+      movementTimers[playerId] = Math.max(
+        0,
+        movementTimers[playerId] - nextMoveIn,
+      );
+    }
+    remaining = Math.max(0, remaining - nextMoveIn);
+
+    const movingPlayerIds = game.players
+      .filter(
+        (player) =>
+          movementTimers[player.id] <= SIMULTANEOUS_EPSILON_MS,
+      )
+      .map((player) => player.id);
+    const commands = createEmptyCommands();
+
+    for (const playerId of movingPlayerIds) {
+      commands[playerId] = pendingCommands[playerId];
+      pendingCommands[playerId] = {};
+    }
+    if (
+      selectedMode === "bot" &&
+      movingPlayerIds.includes("player2")
+    ) {
+      commands.player2 = chooseBotCommand(
+        game,
+        commands.player1,
+        movingPlayerIds.includes("player1"),
+      );
+    }
+
+    game = stepGame(game, commands, movingPlayerIds, nextMoveIn);
+    if (game.status === "playing") {
+      for (const playerId of movingPlayerIds) {
+        const player = game.players.find((candidate) => candidate.id === playerId);
+        movementTimers[playerId] = SPEED_INTERVAL_MS[player.speedLevel];
+      }
+    }
+  }
+}
+
+document.querySelectorAll("[data-mode]").forEach((button) => {
+  button.addEventListener("click", () => startMatch(button.dataset.mode));
+});
+
+attachKeyboardControls({
+  onCommand: queueCommand,
+  onRestart: startNewRound,
+});
+restartButton.addEventListener("click", startNewRound);
+changeModeButton.addEventListener("click", returnToModeMenu);
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    previousFrameTime = null;
+  }
+});
+
+function frame(timestamp) {
+  if (previousFrameTime === null) {
+    previousFrameTime = timestamp;
+  }
+
+  const elapsed = Math.min(timestamp - previousFrameTime, MAX_FRAME_DELTA_MS);
+  previousFrameTime = timestamp;
+
+  if (game?.status === "playing") {
+    advanceByElapsed(elapsed);
+  } else {
+    pendingCommands = createEmptyCommands();
+  }
+
+  render();
+  requestAnimationFrame(frame);
+}
+
+render();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
